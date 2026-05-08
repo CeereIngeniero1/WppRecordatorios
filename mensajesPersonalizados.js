@@ -32,14 +32,7 @@ function generarMensajeAsignada(cita) {
     const horaFormat = `${horaStr}:${minStr}`;
 
     // EDITA EL TEXTO A CONTINUACIÓN:
-    return `*${cita.Nom_Paciente}*, su cita de imágenes diagnósticas en SERIMAGENES IPS fue asignada para el día *${dia}/${mes}/${anio}* a las *${horaFormat}*.
-
-Si no puede acudir recuerde cancelar con anterioridad a las líneas: 444 6324 - 3013105837.
-📍 *Dirección:* Calle 26 N°28-12 Consultorio 401. Torre Médica, Centro Comercial los Sauces de Oriente. Marinilla.
-
-Síguenos en nuestras redes:
-📸 Instagram: https://instagram.com/serimagenes?igshid=OGRjNzg3M2Y=
-📘 Facebook: https://www.facebook.com/Serimagenes?mibextid=ZbWKwL`;
+    return `${cita.Nom_Paciente} saludos! se confirma su cita en la clínica MEDIMUJER con el (la) profesional ${cita.Nom_profesional} para el día ${dia} del mes ${mes} a las ${horaFormat} horas.\nEstamos ubicados en esta dirección: Carrera 48 # 19A-40 torre médica ciudad del Río, piso 12 consultorio 1201, somos única sede en Medellín y Colombia.`;
 }
 
 /**
@@ -58,10 +51,7 @@ function generarMensajeRecordatorio(cita) {
     const horaFormat = `${horaStr}:${minStr}`;
 
     // EDITA EL TEXTO A CONTINUACIÓN:
-    return `*${cita.Nom_Paciente}*, recuerde asistir a su cita asignada de imágenes diagnósticas en SERIMAGENES IPS el día *${dia}/${mes}/${anio}* a las *${horaFormat}*.
-
-Si no puede acudir recuerde cancelar con anterioridad a las líneas: 444 6324 - 3013105837.
-📍 *Dirección:* Calle 26 N°28-12 Consultorio 401. Torre Médica, Centro Comercial los Sauces de Oriente. Marinilla.`;
+    return `${cita.Nom_Paciente} saludos! Recuerde su cita en la clínica MEDIMUJER con el (la) profesional ${cita.Nom_profesional} el dia de mañana a las ${horaFormat} horas\nEstamos ubicados en esta dirección: Carrera 48 # 19A-40 torre médica ciudad del Río, piso 12 consultorio 1201, somos única sede en Medellín y Colombia.`;
 }
 
 module.exports = {
