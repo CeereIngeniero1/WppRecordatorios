@@ -2,7 +2,8 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const { connectDB } = require('./database');
 const { obtenerCitas } = require('./services/citasService');
-const { procesarYEnviarCitas, generarMensajeAsignada, generarMensajeRecordatorio } = require('./services/whatsappService');
+const { procesarYEnviarCitas } = require('./services/whatsappService');
+const { generarMensajeAsignada, generarMensajeRecordatorio } = require('./mensajesPersonalizados');
 
 // Instancia global para evitar que los ciclos se pisen si la BD tarda en responder
 let procesando = false;

@@ -18,52 +18,6 @@ function formatearNumero(numero) {
     return null;
 }
 
-/**
- * Genera el mensaje para citas de "Hoy" (Asignada)
- */
-function generarMensajeAsignada(cita) {
-    // Ejemplo de fecha proveniente de BD: 2026-05-04T08:00:00.000Z o string
-    // Extraer a mano o usar Date object, asumiendo que Fecha_inicio es Date en mssql
-    const fecha = new Date(cita.Fecha_inicio);
-    const dia = String(fecha.getDate()).padStart(2, '0');
-    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-    const anio = fecha.getFullYear();
-    
-    // HoraInicio asumiendo formato de fecha o string, si mssql devuelve Date:
-    const hora = new Date(cita.Hora_inicio);
-    const horaStr = String(hora.getHours()).padStart(2, '0');
-    const minStr = String(hora.getMinutes()).padStart(2, '0');
-    const horaFormat = `${horaStr}:${minStr}`;
-
-    return `*${cita.Nom_Paciente}*, su cita de imágenes diagnósticas en SERIMAGENES IPS fue asignada para el día *${dia}/${mes}/${anio}* a las *${horaFormat}*.
-
-Si no puede acudir recuerde cancelar con anterioridad a las líneas: 444 6324 - 3013105837.
-📍 *Dirección:* Calle 26 N°28-12 Consultorio 401. Torre Médica, Centro Comercial los Sauces de Oriente. Marinilla.
-
-Síguenos en nuestras redes:
-📸 Instagram: https://instagram.com/serimagenes?igshid=OGRjNzg3M2Y=
-📘 Facebook: https://www.facebook.com/Serimagenes?mibextid=ZbWKwL`;
-}
-
-/**
- * Genera el mensaje para citas de "Mañana" (Recordatorio)
- */
-function generarMensajeRecordatorio(cita) {
-    const fecha = new Date(cita.Fecha_inicio);
-    const dia = String(fecha.getDate()).padStart(2, '0');
-    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-    const anio = fecha.getFullYear();
-    
-    const hora = new Date(cita.Hora_inicio);
-    const horaStr = String(hora.getHours()).padStart(2, '0');
-    const minStr = String(hora.getMinutes()).padStart(2, '0');
-    const horaFormat = `${horaStr}:${minStr}`;
-
-    return `*${cita.Nom_Paciente}*, recuerde asistir a su cita asignada de imágenes diagnósticas en SERIMAGENES IPS el día *${dia}/${mes}/${anio}* a las *${horaFormat}*.
-
-Si no puede acudir recuerde cancelar con anterioridad a las líneas: 444 6324 - 3013105837.
-📍 *Dirección:* Calle 26 N°28-12 Consultorio 401. Torre Médica, Centro Comercial los Sauces de Oriente. Marinilla.`;
-}
 
 /**
  * Procesa una lista de citas y envía los mensajes uno por uno.
@@ -118,7 +72,5 @@ async function procesarYEnviarCitas(client, citas, estadoAActualizar, generadorM
 }
 
 module.exports = {
-    generarMensajeAsignada,
-    generarMensajeRecordatorio,
     procesarYEnviarCitas
 };
