@@ -62,8 +62,10 @@ async function procesarYEnviarCitas(client, citas, estadoAActualizar, generadorM
                 await actualizarEstadoWhatsApp(cita.Id_Compromiso, estadoAActualizar);
             }
             
-            // Espera de seguridad (2 segundos) para no saturar WhatsApp (Anti-Ban)
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Espera aleatoria de seguridad (entre 15 y 25 segundos) para no saturar WhatsApp y evitar bloqueos
+            const tiempoEspera = Math.floor(Math.random() * (25000 - 15000 + 1)) + 15000;
+            console.log(`Esperando ${tiempoEspera / 1000} segundos antes del siguiente mensaje...`);
+            await new Promise(resolve => setTimeout(resolve, tiempoEspera));
             
         } catch (error) {
             console.error(`Error al enviar mensaje a ${chatId}:`, error.message);
