@@ -70,6 +70,13 @@ client.on('message', async (msg) => {
  * Utiliza `async/await` secuencial para evitar condiciones de carrera.
  */
 async function cicloDeNotificaciones() {
+    // Verificar si estamos dentro del horario de envío (8 AM - 8 PM)
+    const horaActual = new Date().getHours();
+    if (horaActual < 8 || horaActual >= 20) {
+        console.log('Fuera del horario de envío (8 AM - 8 PM). Saltando ciclo.');
+        return;
+    }
+
     // Si el ciclo anterior aún no ha terminado, no hacemos nada para no saturar
     if (procesando) return;
     
