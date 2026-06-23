@@ -58,16 +58,12 @@ Si tiene alguna inquietud o necesita reprogramar, puede responder a este mensaje
 🩺 Profesional: ${cita.Nom_profesional}
 📅 Fecha: ${dia} de ${mesNombre}
 ⏰ Hora: ${horaFormat}
-📍 Dirección: Carrera 48 # 19A-40, Torre Médica Ciudad del Río, piso 12, consultorio 1201. Medellín.
-
-Si necesita reprogramar o tiene alguna inquietud, puede responder a este mensaje.`;
+📍 Dirección: Carrera 48 # 19A-40, Torre Médica Ciudad del Río, piso 12, consultorio 1201. Medellín.`;
 
     // OPCIÓN 3: Compacta e informativa
     const opcion3 = `Hola ${cita.Nom_Paciente}. Su cita en MEDIMUJER está programada para el ${dia}/${mes} a las ${horaFormat}, con el/la profesional ${cita.Nom_profesional}.
 
-📍 Carrera 48 # 19A-40, Torre Médica Ciudad del Río, piso 12, consultorio 1201. Medellín.
-
-Para inquietudes o reprogramación, puede responder a este mensaje.`;
+📍 Carrera 48 # 19A-40, Torre Médica Ciudad del Río, piso 12, consultorio 1201. Medellín.`;
 
     const opciones = [opcion1, opcion2, opcion3];
 
@@ -111,16 +107,12 @@ function generarMensajeRecordatorio(cita) {
     const opcion1 = `Hola, ${cita.Nom_Paciente}. Le recordamos su cita médica en MEDIMUJER para el día de mañana a las ${horaFormat}.
 
 Profesional: ${cita.Nom_profesional}
-Dirección: Carrera 48 # 19A-40, Torre Médica Ciudad del Río, piso 12, consultorio 1201.
-
-Por favor confirme su asistencia respondiendo SÍ o NO a este mensaje.`;
+Dirección: Carrera 48 # 19A-40, Torre Médica Ciudad del Río, piso 12, consultorio 1201.`;
 
     // OPCIÓN 2: Cálida y clara
     const opcion2 = `Hola, ${cita.Nom_Paciente}. Le recordamos su cita para mañana con el/la profesional ${cita.Nom_profesional} a las ${horaFormat}.
 
-📍 Dirección: Carrera 48 # 19A-40, Torre Médica Ciudad del Río, piso 12, consultorio 1201.
-
-Para confirmar su asistencia, por favor responda SÍ o NO a este mensaje.`;
+📍 Dirección: Carrera 48 # 19A-40, Torre Médica Ciudad del Río, piso 12, consultorio 1201.`;
 
     // OPCIÓN 3: Estructurada con viñetas
     const opcion3 = `Recordatorio de cita - MEDIMUJER
@@ -129,9 +121,7 @@ Estimada/o ${cita.Nom_Paciente}, le recordamos su cita médica programada para m
 
 🩺 Profesional: ${cita.Nom_profesional}
 ⏰ Hora: ${horaFormat}
-📍 Ubicación: Carrera 48 # 19A-40, Torre Médica Ciudad del Río, piso 12, consultorio 1201.
-
-Por favor confirme su asistencia respondiendo SÍ o NO a este chat.`;
+📍 Ubicación: Carrera 48 # 19A-40, Torre Médica Ciudad del Río, piso 12, consultorio 1201.`;
 
     const opciones = [opcion1, opcion2, opcion3];
 
