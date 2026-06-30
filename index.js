@@ -12,7 +12,7 @@ let procesando = false;
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
-        headless: false,
+        headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
     }
 });
@@ -36,14 +36,14 @@ client.on('auth_failure', msg => {
 
 client.on('ready', async () => {
     console.log('¡El cliente de WhatsApp está listo!');
-    
+
     try {
         await connectDB();
         console.log('Conexión a Base de Datos iniciada correctamente.');
-        
+
         // Iniciamos el ciclo dinámico autoprogramado
         await iniciarCicloDinamico();
-        
+
     } catch (err) {
         console.error('Error al conectar a la base de datos', err);
     }
@@ -81,7 +81,7 @@ async function iniciarCicloDinamico() {
 
     // Si por alguna razón hay otro ciclo ejecutándose, salimos para no duplicar
     if (procesando) return;
-    
+
     procesando = true;
     let huboCitas = false;
 
