@@ -3,51 +3,29 @@ const { enviarEmailCita } = require('./emailService');
 
 const DELAY_ENTRE_CORREOS_MS = 1500;
 
-/** Confirmación enviada; aún puede aplicar recordatorio de mañana */
+/** Confirmación de programación enviada */
 const ESTADO_CORREO_PROGRAMADA = 1;
-/** Confirmación de cita-mañana, o recordatorio de mañana ya enviado */
-const ESTADO_CORREO_COMPLETO = 2;
-
-/**
- * ¿La fecha de la cita es el día calendario de mañana?
- * @param {object} cita
- * @returns {boolean}
- */
-function esCitaManana(cita) {
-    const fechaCita = new Date(cita.Fecha_inicio);
-    if (Number.isNaN(fechaCita.getTime())) return false;
-
-    const manana = new Date();
-    manana.setHours(0, 0, 0, 0);
-    manana.setDate(manana.getDate() + 1);
-
-    const diaCita = new Date(fechaCita);
-    diaCita.setHours(0, 0, 0, 0);
-
-    return diaCita.getTime() === manana.getTime();
-}
-
-/**
- * Estado a guardar tras un correo de programación:
- * cita mañana → 2 (solo ese mail); resto → 1 (queda pendiente recordatorio).
- */
-function estadoTrasProgramacion(cita) {
-    return esCitaManana(cita) ? ESTADO_CORREO_COMPLETO : ESTADO_CORREO_PROGRAMADA;
-}
+/** Recordatorio de mañana enviado */
+const ESTADO_CORREO_RECORDATORIO = 2;
 
 /**
  * Procesa citas y envía correos.
+ * - asignada → Correo = 1
+ * - recordatorio → Correo = 2
+ *
+ * Si la cita se programó hoy para mañana, la vista SQL de mañana la excluye
+ * (Fecha Digitación = hoy), así solo llega el correo de programación.
+ *
  * @param {Array} citas
  * @param {'asignada'|'recordatorio'} tipoEmail
  */
 async function procesarYEnviarEmails(citas, tipoEmail) {
+    const estadoDestino =
+        tipoEmail === 'recordatorio' ? ESTADO_CORREO_RECORDATORIO : ESTADO_CORREO_PROGRAMADA;
+
     for (let i = 0; i < citas.length; i++) {
         const cita = citas[i];
         const tieneCorreo = !!(cita.Correo && String(cita.Correo).trim() !== '');
-        const estadoDestino =
-            tipoEmail === 'recordatorio'
-                ? ESTADO_CORREO_COMPLETO
-                : estadoTrasProgramacion(cita);
 
         if (!tieneCorreo) {
             console.log(
@@ -84,7 +62,6 @@ async function procesarYEnviarEmails(citas, tipoEmail) {
 
 module.exports = {
     procesarYEnviarEmails,
-    esCitaManana,
     ESTADO_CORREO_PROGRAMADA,
-    ESTADO_CORREO_COMPLETO
+    ESTADO_CORREO_RECORDATORIO
 };

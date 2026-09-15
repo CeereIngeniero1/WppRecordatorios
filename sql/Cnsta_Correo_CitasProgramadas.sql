@@ -14,10 +14,8 @@ estado 58 y fecha/hora futura. Complementa [Cnsta Correo CitasManana]
 ESTADOS CompromisoVI.Correo
 ---------------------------
   0 = sin notificación
-  1 = confirmación de programación enviada (si la cita NO es mañana)
-  2 = ciclo completo:
-        - confirmación cuando la cita ES mañana (no hace falta recordatorio), o
-        - recordatorio de mañana ya enviado (ver vista CitasManana)
+  1 = confirmación de programación enviada
+  2 = recordatorio de mañana enviado
 
 COLUMNAS DEVUELTAS (consumo en Node: services/citasService.js)
 --------------------------------------------------------------
@@ -40,8 +38,10 @@ FILTROS
 ACTUALIZACIÓN DESDE LA APP
 --------------------------
 Tras confirmación exitosa:
-  - Si la cita es mañana → Correo = 2
-  - Si no → Correo = 1
+  UPDATE CompromisoVI SET Correo = 1 WHERE [Id CompromisoVI] = @id
+
+Si la cita es mañana y se programó hoy, el recordatorio no se envía:
+la vista [Cnsta Correo CitasManana] exige Fecha Digitación < hoy.
 
 INSTALACIÓN
 -----------

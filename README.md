@@ -7,19 +7,20 @@ Bot Node.js que notifica citas médicas por **correo electrónico** (sin WhatsAp
 
 ## Regla anti-doble aviso
 
-Si **hoy** programan una cita **para mañana**, solo se envía el correo de programación (se marca `Correo = 2`). No se envía además el recordatorio de mañana.
+Si **hoy** programan una cita **para mañana**, solo llega el correo de programación.
+La vista de mañana exige `Fecha Digitación < hoy`, así no se envía el recordatorio ese mismo día.
 
 | Situación | Correos | `CompromisoVI.Correo` |
 |-----------|---------|------------------------|
-| Programan cita para dentro de varios días | Confirmación ahora | `0 → 1` |
-| Llega el día anterior a esa cita | Recordatorio | `1 → 2` |
-| Programan hoy una cita para mañana | Solo confirmación | `0 → 2` |
+| Programan cita con anticipación | Confirmación ahora | `0 → 1` |
+| Día anterior a esa cita | Recordatorio | `1 → 2` |
+| Programan hoy para mañana | Solo confirmación | `0 → 1` (sin recordatorio) |
 
 ## Qué hace el ciclo
 
 1. Conecta a SQL Server.
 2. Consulta `[Cnsta Correo CitasProgramadas]` (`Correo = 0`) → email tipo `asignada`.
-3. Consulta `[Cnsta Correo CitasManana]` (`Correo = 1`, fecha = mañana) → email tipo `recordatorio`.
+3. Consulta `[Cnsta Correo CitasManana]` (`Correo = 1`, fecha = mañana, digitada antes de hoy) → email tipo `recordatorio`.
 4. Si el envío falla, no marca y reintenta en el siguiente ciclo.
 
 Opera entre **8:00 y 20:00**.
@@ -70,8 +71,8 @@ sql/Cnsta_Correo_CitasManana.sql
 
 ```
 ciclo (8h–20h)
-  → vista CitasProgramadas (Correo=0) → email asignada → Correo 1 o 2
-  → vista CitasManana (Correo=1, fecha=mañana) → email recordatorio → Correo 2
+  → vista CitasProgramadas (Correo=0) → email asignada → Correo 1
+  → vista CitasManana (Correo=1, fecha=mañana, digitada antes de hoy) → recordatorio → Correo 2
   → espera 1 min / N min → repetir
 ```
 

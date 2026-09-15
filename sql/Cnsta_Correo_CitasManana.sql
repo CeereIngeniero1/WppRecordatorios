@@ -7,25 +7,23 @@ Base de datos esperada: Medimujer
 
 PROPÓSITO
 ---------
-Citas cuya FECHA es MAÑANA y ya recibieron el correo de programación
-(CompromisoVI.Correo = 1), pendientes del recordatorio del día anterior
-(aún no Correo = 2).
+Citas cuya FECHA es MAÑANA, con confirmación ya enviada (Correo = 1),
+pendientes del recordatorio (aún no Correo = 2).
 
-Evita doble aviso cuando hoy programan una cita para mañana:
-  - Al confirmar programación, si la cita es mañana el bot marca Correo = 2
-    (solo email de programación; no entra en esta vista).
-  - Si la cita se programó con más anticipación (Correo = 1), el día anterior
-    esta vista la incluye y el bot envía el recordatorio → Correo = 2.
+Evita doble aviso si HOY programaron la cita para MAÑANA:
+  solo se exige Fecha Digitación < hoy. Así reciben únicamente el correo
+  de programación (Correo = 1) y no entran en esta vista el mismo día.
 
 COLUMNAS
 --------
-Mismas alias que [Cnsta Correo CitasProgramadas] para reutilizar citasService.
+Mismas alias que [Cnsta Correo CitasProgramadas].
 
 FILTROS
 -------
   - Correo = 1
   - Id Estado = 58
-  - Fecha de la cita = CAST(GETDATE()+1 AS DATE)
+  - Fecha de la cita = mañana
+  - Fecha Digitación < hoy   ← no re-avisar si se programó hoy
   - E-mail válido
   - Hora entre 06:00 y 22:00
 
@@ -37,8 +35,8 @@ Tras recordatorio exitoso:
 ESTADOS CompromisoVI.Correo
 ---------------------------
   0 = sin notificación
-  1 = confirmación de programación enviada (falta recordatorio si aplica)
-  2 = ciclo de correos completo (programación de cita-mañana, o ya recordatorio)
+  1 = confirmación de programación enviada
+  2 = recordatorio de mañana enviado
 
 INSTALACIÓN
 -----------
@@ -80,6 +78,7 @@ WHERE
     (C.Correo = 1)
     AND (C.[Id Estado] = 58)
     AND (CAST(C.[Fecha Inicio CompromisoVI] AS DATE) = CAST(DATEADD(DAY, 1, GETDATE()) AS DATE))
+    AND (CAST(C.[Fecha Digitación CompromisoVI] AS DATE) < CAST(GETDATE() AS DATE))
     AND (E2.[E-mail Nro 1 EntidadII] IS NOT NULL)
     AND (LTRIM(RTRIM(E2.[E-mail Nro 1 EntidadII])) <> '')
     AND (E2.[E-mail Nro 1 EntidadII] LIKE '%@%.%')
