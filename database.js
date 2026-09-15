@@ -1,14 +1,22 @@
 const sql = require('mssql');
 require('dotenv').config();
 
+function requerirEnv(nombre) {
+    const valor = process.env[nombre];
+    if (!valor || String(valor).trim() === '') {
+        throw new Error(`Variable de entorno requerida faltante: ${nombre}`);
+    }
+    return valor;
+}
+
 const dbConfig = {
-    user: process.env.DB_USER || 'Recordatorios',
-    password: process.env.DB_PASSWORD || 'Crsoft2022*',
-    server: process.env.DB_SERVER || 'MEDI_MUJER',
-    database: process.env.DB_NAME || 'CeereSio',
+    user: requerirEnv('DB_USER'),
+    password: requerirEnv('DB_PASSWORD'),
+    server: requerirEnv('DB_SERVER'),
+    database: requerirEnv('DB_NAME'),
     options: {
-        encrypt: false, // Usar true si estás en Azure
-        trustServerCertificate: true, // Cambiar a true para desarrollo local
+        encrypt: false,
+        trustServerCertificate: true,
         enableArithAbort: true
     }
 };

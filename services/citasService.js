@@ -1,23 +1,35 @@
 const { getPool, sql } = require('../database');
 
 /**
- * Obtiene las citas programadas desde la vista/tabla especificada
- * @param {string} vista Nombre de la vista (ej. [Cnsta Wpp CitasProgramadas])
- * @returns {Promise<Array>} Lista de citas
+ * Obtiene citas pendientes de notificación por correo desde la vista SQL.
+ *
+ * Vista documentada en: sql/Cnsta_Correo_CitasProgramadas.sql
+ * Nombre: [Cnsta Correo CitasProgramadas]
+ *
+ * @param {string} vista Nombre de la vista (ej. [Cnsta Correo CitasProgramadas])
+ * @returns {Promise<Array>} Lista de citas (Correo = email del paciente)
  */
 async function obtenerCitas(vista) {
     try {
         const pool = await getPool();
         const request = pool.request();
-        
-        // Obtenemos los primeros 200 registros que requieran recordatorio
+
         const result = await request.query(`
-            SELECT TOP (200) 
-                WhatsApp, Id_Compromiso, Hora_inicio, Hora_Fin, Fecha_inicio, 
-                Documento_Paciente, Nom_Paciente, Correo, Tel, Documento_Profecional, Nom_profesional 
+            SELECT
+                Estado_Correo,
+                Id_Compromiso,
+                Hora_inicio,
+                Hora_Fin,
+                Fecha_inicio,
+                Documento_Paciente,
+                Nom_Paciente,
+                Correo,
+                Tel,
+                Documento_Profecional,
+                Nom_profesional
             FROM ${vista}
         `);
-        
+
         return result.recordset;
     } catch (error) {
         console.error(`Error al consultar citas de la vista ${vista}:`, error);
@@ -26,30 +38,32 @@ async function obtenerCitas(vista) {
 }
 
 /**
- * Actualiza el estado de WhatsApp en la cita (1 = Hoy, 2 = Mañana, etc.)
- * @param {number} idCompromiso ID de la cita
- * @param {number} estado Estado a actualizar
+ * Marca el aviso de correo de la cita (CompromisoVI.Correo).
+ * 0 = pendiente, 1 = correo de cita programada enviado.
+ *
+ * @param {number} idCompromiso Id CompromisoVI
+ * @param {number} estado Valor a guardar en CompromisoVI.Correo
  */
-async function actualizarEstadoWhatsApp(idCompromiso, estado) {
+async function actualizarEstadoCorreo(idCompromiso, estado) {
     try {
         const pool = await getPool();
         const request = pool.request();
-        
-        request.input('Estado', sql.Numeric, estado);
-        request.input('id', sql.Numeric, idCompromiso);
-        
+
+        request.input('Estado', sql.Int, estado);
+        request.input('id', sql.Int, idCompromiso);
+
         await request.query(`
-            UPDATE CompromisoVI 
-            SET WhatsApp = @Estado 
+            UPDATE CompromisoVI
+            SET Correo = @Estado
             WHERE [Id CompromisoVI] = @id
         `);
-        console.log(`Cita ${idCompromiso} actualizada al estado ${estado}`);
+        console.log(`Cita ${idCompromiso}: CompromisoVI.Correo = ${estado}`);
     } catch (error) {
-        console.error(`Error al actualizar estado de cita ${idCompromiso}:`, error);
+        console.error(`Error al actualizar Correo de cita ${idCompromiso}:`, error);
     }
 }
 
 module.exports = {
     obtenerCitas,
-    actualizarEstadoWhatsApp
+    actualizarEstadoCorreo
 };

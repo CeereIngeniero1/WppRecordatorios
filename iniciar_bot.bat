@@ -1,7 +1,7 @@
 @echo off
-title Bot de WhatsApp - Recordatorios
+title Bot de Correo - Recordatorios de Citas
 echo ===================================================
-echo     Iniciando Bot de WhatsApp para Recordatorios
+echo   Iniciando notificaciones por correo electronico
 echo ===================================================
 echo.
 :: Cambiar al directorio donde se encuentra este archivo .bat
