@@ -9,11 +9,16 @@ function requerirEnv(nombre) {
     return valor;
 }
 
+const requestTimeoutMs = parseInt(process.env.DB_REQUEST_TIMEOUT_MS || '120000', 10);
+const connectionTimeoutMs = parseInt(process.env.DB_CONNECTION_TIMEOUT_MS || '30000', 10);
+
 const dbConfig = {
     user: requerirEnv('DB_USER'),
     password: requerirEnv('DB_PASSWORD'),
     server: requerirEnv('DB_SERVER'),
     database: requerirEnv('DB_NAME'),
+    connectionTimeout: connectionTimeoutMs,
+    requestTimeout: requestTimeoutMs,
     options: {
         encrypt: false,
         trustServerCertificate: true,

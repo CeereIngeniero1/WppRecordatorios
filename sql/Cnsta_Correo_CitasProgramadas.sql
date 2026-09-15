@@ -89,16 +89,14 @@ WHERE
     AND (CAST(C.[Hora Inicio CompromisoVI] AS TIME) >= CAST('06:00:00' AS TIME))
     AND (CAST(C.[Hora Inicio CompromisoVI] AS TIME) <= CAST('22:00:00' AS TIME))
     AND (
-        DATEADD(
-            SECOND,
-            DATEDIFF(SECOND, CAST('00:00:00' AS TIME), CAST(C.[Hora Inicio CompromisoVI] AS TIME)),
-            CAST(C.[Fecha Inicio CompromisoVI] AS DATETIME)
-        ) > GETDATE()
+        /* Cita futura: fecha > hoy, o hoy con hora > ahora (más barato que DATEADD por fila) */
+        CAST(C.[Fecha Inicio CompromisoVI] AS DATE) > CAST(GETDATE() AS DATE)
+        OR (
+            CAST(C.[Fecha Inicio CompromisoVI] AS DATE) = CAST(GETDATE() AS DATE)
+            AND CAST(C.[Hora Inicio CompromisoVI] AS TIME) > CAST(GETDATE() AS TIME)
+        )
     )
 ORDER BY
-    DATEADD(
-        SECOND,
-        DATEDIFF(SECOND, CAST('00:00:00' AS TIME), CAST(C.[Hora Inicio CompromisoVI] AS TIME)),
-        CAST(C.[Fecha Inicio CompromisoVI] AS DATETIME)
-    );
+    C.[Fecha Inicio CompromisoVI],
+    CAST(C.[Hora Inicio CompromisoVI] AS TIME);
 GO

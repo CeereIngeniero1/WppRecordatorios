@@ -32,7 +32,14 @@ async function obtenerCitas(vista) {
 
         return result.recordset;
     } catch (error) {
-        console.error(`Error al consultar citas de la vista ${vista}:`, error);
+        const esTimeout = error.code === 'ETIMEOUT' || (error.message || '').includes('Timeout');
+        if (esTimeout) {
+            console.error(
+                `Timeout al consultar ${vista} (la vista tarda demasiado). Se reintentará en el próximo ciclo.`
+            );
+        } else {
+            console.error(`Error al consultar citas de la vista ${vista}:`, error);
+        }
         return [];
     }
 }
