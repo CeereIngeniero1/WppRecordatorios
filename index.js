@@ -5,17 +5,21 @@ const { obtenerCitas } = require('./services/citasService');
 const { procesarYEnviarEmails } = require('./services/emailNotificacionService');
 
 /**
- * Vista SQL de citas pendientes de correo.
- * Script y documentación: sql/Cnsta_Correo_CitasProgramadas.sql
- * Debe existir en la BD (Medimujer) antes de operar el bot.
+ * Vista: citas pendientes de correo de programación (Correo = 0).
+ * Script: sql/Cnsta_Correo_CitasProgramadas.sql
  */
 const VISTA_CITAS_PROGRAMADAS = '[Cnsta Correo CitasProgramadas]';
+
+/**
+ * Vista: citas de mañana con confirmación ya enviada (Correo = 1).
+ * Script: sql/Cnsta_Correo_CitasManana.sql
+ */
+const VISTA_CITAS_MANANA = '[Cnsta Correo CitasManana]';
 
 let procesando = false;
 
 /**
- * Ciclo de revisión de citas programadas y envío de correos.
- * Se reprograma a sí mismo según el resultado (polling adaptativo).
+ * Ciclo: 1) confirmación al programar  2) recordatorio de mañana.
  */
 async function iniciarCicloDinamico() {
     const horaActual = new Date().getHours();
@@ -32,15 +36,24 @@ async function iniciarCicloDinamico() {
 
     console.log('\n--- Iniciando ciclo de revisión de citas (email) ---');
     try {
-        console.log('Buscando citas programadas pendientes de notificación...');
-        const citas = await obtenerCitas(VISTA_CITAS_PROGRAMADAS);
-
-        if (citas.length > 0) {
-            console.log(`Encontradas ${citas.length} citas programadas.`);
-            await procesarYEnviarEmails(citas);
+        console.log('1) Buscando citas programadas pendientes de confirmación...');
+        const citasProgramadas = await obtenerCitas(VISTA_CITAS_PROGRAMADAS);
+        if (citasProgramadas.length > 0) {
+            console.log(`Encontradas ${citasProgramadas.length} citas programadas.`);
+            await procesarYEnviarEmails(citasProgramadas, 'asignada');
             huboCitas = true;
         } else {
-            console.log('No hay citas programadas pendientes de notificación.');
+            console.log('No hay citas programadas pendientes.');
+        }
+
+        console.log('2) Buscando recordatorios para citas de mañana...');
+        const citasManana = await obtenerCitas(VISTA_CITAS_MANANA);
+        if (citasManana.length > 0) {
+            console.log(`Encontrados ${citasManana.length} recordatorios de mañana.`);
+            await procesarYEnviarEmails(citasManana, 'recordatorio');
+            huboCitas = true;
+        } else {
+            console.log('No hay recordatorios de mañana pendientes.');
         }
     } catch (error) {
         console.error('Error durante el ciclo de notificaciones:', error);

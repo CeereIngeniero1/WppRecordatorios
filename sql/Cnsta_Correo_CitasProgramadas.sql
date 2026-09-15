@@ -7,40 +7,41 @@ Base de datos esperada: Medimujer (o la instancia Ceere/Medimujer en uso)
 
 PROPÓSITO
 ---------
-Devuelve citas médicas pendientes de notificación por CORREO electrónico cuando
-la cita está programada (estado 58), aún no se ha enviado el aviso de correo
-(CompromisoVI.Correo = 0) y la cita es futura.
+Citas pendientes del correo de PROGRAMACIÓN (CompromisoVI.Correo = 0),
+estado 58 y fecha/hora futura. Complementa [Cnsta Correo CitasManana]
+(recordatorio del día anterior).
 
-Reemplaza el uso de [Cnsta Wpp CitasProgramadas], que filtraba por WhatsApp y
-teléfono celular. Esta vista usa la columna CompromisoVI.Correo (int) como
-bandera de envío y exige un e-mail válido en EntidadII.
+ESTADOS CompromisoVI.Correo
+---------------------------
+  0 = sin notificación
+  1 = confirmación de programación enviada (si la cita NO es mañana)
+  2 = ciclo completo:
+        - confirmación cuando la cita ES mañana (no hace falta recordatorio), o
+        - recordatorio de mañana ya enviado (ver vista CitasManana)
 
 COLUMNAS DEVUELTAS (consumo en Node: services/citasService.js)
 --------------------------------------------------------------
-  Estado_Correo       CompromisoVI.Correo (0 = pendiente, 1 = enviado)
+  Estado_Correo       CompromisoVI.Correo
   Id_Compromiso       Id CompromisoVI
-  Hora_inicio         Hora Inicio CompromisoVI (NVARCHAR estilo 121)
-  Hora_Fin            Hora Fin CompromisoVI
-  Fecha_inicio        Fecha Inicio CompromisoVI
-  Documento_Paciente  Entidad Atendida
-  Nom_Paciente        Nombre completo del paciente
-  Correo              E-mail del paciente (EntidadII) — usado por emailService
-  Tel                 Celular (informativo; no requerido)
-  Documento_Profecional / Nom_profesional
+  Hora_inicio / Hora_Fin / Fecha_inicio
+  Documento_Paciente, Nom_Paciente
+  Correo              E-mail del paciente (EntidadII)
+  Tel, Documento_Profecional, Nom_profesional
 
 FILTROS
 -------
-  - Correo = 0                         → pendiente de notificación email
-  - Id Estado = 58                     → cita programada
-  - E-mail no nulo, no vacío, con '@'  → canal email usable
+  - Correo = 0
+  - Id Estado = 58
+  - E-mail válido
   - Hora entre 06:00 y 22:00
-  - Fecha+hora de la cita > GETDATE()  → solo citas futuras
-  TOP (50) ordenadas por fecha/hora ascendente
+  - Fecha+hora de la cita > GETDATE()
+  TOP (50)
 
 ACTUALIZACIÓN DESDE LA APP
 --------------------------
-Tras envío exitoso de email, el bot ejecuta:
-  UPDATE CompromisoVI SET Correo = 1 WHERE [Id CompromisoVI] = @id
+Tras confirmación exitosa:
+  - Si la cita es mañana → Correo = 2
+  - Si no → Correo = 1
 
 INSTALACIÓN
 -----------

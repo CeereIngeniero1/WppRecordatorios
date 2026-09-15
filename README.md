@@ -1,93 +1,86 @@
 # Recordatorios por correo — MEDIMUJER / Ceere
 
-Bot Node.js que envía un **correo electrónico de confirmación** cuando se programa una cita médica. Ya no usa WhatsApp.
+Bot Node.js que notifica citas médicas por **correo electrónico** (sin WhatsApp):
 
-## Qué hace
+1. **Confirmación** cuando se programa la cita.
+2. **Recordatorio** el día anterior, si la cita es mañana.
 
-1. Se conecta a SQL Server (base Medimujer / Ceere).
-2. Consulta la vista `[Cnsta Correo CitasProgramadas]` (citas con `Correo = 0` y estado programado).
-3. Envía un email HTML al paciente con los datos de la cita.
-4. Si el envío es exitoso, marca `CompromisoVI.Correo = 1` para no volver a notificar.
-5. Si el envío falla, **no** marca la cita y la reintenta en el siguiente ciclo.
+## Regla anti-doble aviso
 
-Opera solo entre **8:00 y 20:00**. Fuera de ese horario espera 15 minutos y vuelve a evaluar.
+Si **hoy** programan una cita **para mañana**, solo se envía el correo de programación (se marca `Correo = 2`). No se envía además el recordatorio de mañana.
+
+| Situación | Correos | `CompromisoVI.Correo` |
+|-----------|---------|------------------------|
+| Programan cita para dentro de varios días | Confirmación ahora | `0 → 1` |
+| Llega el día anterior a esa cita | Recordatorio | `1 → 2` |
+| Programan hoy una cita para mañana | Solo confirmación | `0 → 2` |
+
+## Qué hace el ciclo
+
+1. Conecta a SQL Server.
+2. Consulta `[Cnsta Correo CitasProgramadas]` (`Correo = 0`) → email tipo `asignada`.
+3. Consulta `[Cnsta Correo CitasManana]` (`Correo = 1`, fecha = mañana) → email tipo `recordatorio`.
+4. Si el envío falla, no marca y reintenta en el siguiente ciclo.
+
+Opera entre **8:00 y 20:00**.
 
 ## Requisitos
 
-- Node.js 18+ recomendado
-- Acceso a SQL Server con la vista creada
-- Cuenta SMTP (ej. `recordatorio@medimujer.com`)
+- Node.js 18+
+- SQL Server con **ambas** vistas creadas
+- Cuenta SMTP
 
 ## Instalación
 
 ```bash
 npm install
-```
-
-Copia la configuración de entorno:
-
-```bash
 copy .env.example .env
 ```
 
-Completa en `.env`:
+Completa el `.env` (DB + SMTP). Ver `.env.example`.
 
-| Variable | Descripción |
-|----------|-------------|
-| `DB_USER`, `DB_PASSWORD`, `DB_SERVER`, `DB_NAME` | Conexión SQL Server |
-| `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_SECURE` | SMTP (puerto 465 → `EMAIL_SECURE=true`) |
-| `EMAIL_USER`, `EMAIL_PASS`, `EMAIL_FROM` | Credenciales y remitente |
-| `EMAIL_TEST_MODE`, `EMAIL_TEST_ADDRESS` | Si es `true`, redirige todos los correos a la dirección de prueba |
-| `POLLING_INTERVAL_EMPTY_MINUTES` | Minutos de espera si no hay citas (default 15) |
+### Vistas SQL (obligatorias — créalas en la BD)
 
-### Vista SQL (obligatoria)
+Ejecuta en SSMS:
 
-Ejecuta en SQL Server el script:
+1. [`sql/Cnsta_Correo_CitasProgramadas.sql`](sql/Cnsta_Correo_CitasProgramadas.sql)
+2. [`sql/Cnsta_Correo_CitasManana.sql`](sql/Cnsta_Correo_CitasManana.sql)
 
-[`sql/Cnsta_Correo_CitasProgramadas.sql`](sql/Cnsta_Correo_CitasProgramadas.sql)
-
-La vista filtra citas futuras en estado `58`, con email válido y `CompromisoVI.Correo = 0`.
-
-## Cómo arrancar
+## Arranque
 
 ```bash
 npm start
 ```
 
-O en Windows: doble clic en `iniciar_bot.bat`.
+O `iniciar_bot.bat` en Windows.
 
-## Estructura del proyecto
-
-```
-index.js                          Orquestador y ciclo de polling
-database.js                       Pool SQL Server (exige variables .env)
-services/citasService.js          Lectura de la vista + UPDATE Correo
-services/emailService.js          Plantilla HTML y envío SMTP
-services/emailNotificacionService.js  Pipeline: enviar y marcar estado
-sql/Cnsta_Correo_CitasProgramadas.sql  Definición y documentación de la vista
-.env.example                      Plantilla de configuración
-```
-
-## Flujo resumido
+## Estructura
 
 ```
-Arranque → connectDB → ciclo (8h–20h)
-    → SELECT vista [Cnsta Correo CitasProgramadas]
-    → por cada cita: enviarEmailCita (tipo asignada)
-    → si OK → UPDATE CompromisoVI SET Correo = 1
-    → espera 1 min (si hubo citas) o N min (si vacío) → repetir
+index.js                              Ciclo: programadas + mañana
+database.js                           Pool SQL
+services/citasService.js              SELECT vistas + UPDATE Correo
+services/emailService.js              Plantillas HTML SMTP
+services/emailNotificacionService.js  Envío + estados 1/2
+sql/Cnsta_Correo_CitasProgramadas.sql
+sql/Cnsta_Correo_CitasManana.sql
+```
+
+## Flujo
+
+```
+ciclo (8h–20h)
+  → vista CitasProgramadas (Correo=0) → email asignada → Correo 1 o 2
+  → vista CitasManana (Correo=1, fecha=mañana) → email recordatorio → Correo 2
+  → espera 1 min / N min → repetir
 ```
 
 ## Dependencias
 
-Solo las necesarias:
-
-- `dotenv` — variables de entorno
-- `mssql` — SQL Server
-- `nodemailer` — envío de correo
+`dotenv`, `mssql`, `nodemailer`
 
 ## Notas
 
-- `CompromisoVI.Correo` es la bandera de notificación por email (`0` pendiente, `1` enviado). No se modifica `Id Estado` de la cita.
-- `CompromisoVI.WhatsApp` ya no se usa en este bot.
-- No subas el archivo `.env` al repositorio (está en `.gitignore`).
+- No se modifica `Id Estado` de la cita (sigue en 58).
+- `WhatsApp` no se usa.
+- No subas `.env` al repositorio.

@@ -39,7 +39,9 @@ async function obtenerCitas(vista) {
 
 /**
  * Marca el aviso de correo de la cita (CompromisoVI.Correo).
- * 0 = pendiente, 1 = correo de cita programada enviado.
+ * 0 = pendiente
+ * 1 = confirmación de programación (cita no es mañana)
+ * 2 = ciclo completo (programación de cita-mañana, o recordatorio enviado)
  *
  * @param {number} idCompromiso Id CompromisoVI
  * @param {number} estado Valor a guardar en CompromisoVI.Correo
