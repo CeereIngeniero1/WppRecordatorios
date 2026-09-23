@@ -95,6 +95,7 @@ ciclo (8h–20h)
 
 ## Notas
 
+- Los correos se envían **uno a uno** con pausas aleatorias según el tamaño del lote (aprox. 20 s–3 min) y descansos largos en lotes grandes, para no saturar el SMTP.
 - No se modifica `Id Estado` de la cita (sigue en 58).
 - `WhatsApp` no se usa.
 - No subas `.env` al repositorio.
