@@ -55,6 +55,18 @@ npm start
 
 O `iniciar_bot.bat` en Windows.
 
+### Como servicio de Windows (recomendado en el cliente)
+
+Sí es posible. Guía completa: [`servicio/README.md`](servicio/README.md).
+
+Resumen:
+
+1. Instalar Node.js y configurar `.env`.
+2. Copiar `nssm.exe` (64-bit) en `servicio\`.
+3. Ejecutar como Administrador: `servicio\install-servicio.bat`.
+
+El servicio se llama **MEDIMUJER - Recordatorios por Correo** e inicia con Windows.
+
 ## Estructura
 
 ```
@@ -65,6 +77,7 @@ services/emailService.js              Plantillas HTML SMTP
 services/emailNotificacionService.js  Envío + estados 1/2
 sql/Cnsta_Correo_CitasProgramadas.sql
 sql/Cnsta_Correo_CitasManana.sql
+servicio/                             Instalación como servicio Windows (NSSM)
 ```
 
 ## Flujo
