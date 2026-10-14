@@ -32,7 +32,15 @@ async function iniciarCicloDinamico() {
     if (procesando) return;
 
     procesando = true;
-    let huboCitas = false;
+    let enviados = 0;
+    let fallidos = 0;
+    let limiteSmtp = false;
+
+    const acumular = (resultado) => {
+        enviados += resultado.enviados;
+        fallidos += resultado.fallidos;
+        limiteSmtp = limiteSmtp || resultado.limiteSmtp;
+    };
 
     console.log('\n--- Iniciando ciclo de revisión de citas (email) ---');
     try {
@@ -40,20 +48,20 @@ async function iniciarCicloDinamico() {
         const citasProgramadas = await obtenerCitas(VISTA_CITAS_PROGRAMADAS);
         if (citasProgramadas.length > 0) {
             console.log(`Encontradas ${citasProgramadas.length} citas programadas.`);
-            await procesarYEnviarEmails(citasProgramadas, 'asignada');
-            huboCitas = true;
+            acumular(await procesarYEnviarEmails(citasProgramadas, 'asignada'));
         } else {
             console.log('No hay citas programadas pendientes.');
         }
 
-        console.log('2) Buscando recordatorios para citas de mañana...');
-        const citasManana = await obtenerCitas(VISTA_CITAS_MANANA);
-        if (citasManana.length > 0) {
-            console.log(`Encontrados ${citasManana.length} recordatorios de mañana.`);
-            await procesarYEnviarEmails(citasManana, 'recordatorio');
-            huboCitas = true;
-        } else {
-            console.log('No hay recordatorios de mañana pendientes.');
+        if (!limiteSmtp) {
+            console.log('2) Buscando recordatorios para citas de mañana...');
+            const citasManana = await obtenerCitas(VISTA_CITAS_MANANA);
+            if (citasManana.length > 0) {
+                console.log(`Encontrados ${citasManana.length} recordatorios de mañana.`);
+                acumular(await procesarYEnviarEmails(citasManana, 'recordatorio'));
+            } else {
+                console.log('No hay recordatorios de mañana pendientes.');
+            }
         }
     } catch (error) {
         console.error('Error durante el ciclo de notificaciones:', error);
@@ -62,13 +70,22 @@ async function iniciarCicloDinamico() {
         console.log('--- Ciclo de revisión finalizado ---');
     }
 
-    let proximaEspera = 60 * 1000;
-    if (!huboCitas) {
-        const minutosVacio = parseInt(process.env.POLLING_INTERVAL_EMPTY_MINUTES || '15', 10);
+    const minutosVacio = parseInt(process.env.POLLING_INTERVAL_EMPTY_MINUTES || '15', 10);
+    const minutosBloqueo = parseInt(process.env.SMTP_LIMIT_WAIT_MINUTES || '60', 10);
+    let proximaEspera;
+
+    if (limiteSmtp) {
+        proximaEspera = minutosBloqueo * 60 * 1000;
+        console.log(`Cuenta SMTP bloqueada por exceso de envíos. Esperando ${minutosBloqueo} minutos antes de reintentar...\n`);
+    } else if (enviados > 0) {
+        proximaEspera = 60 * 1000;
+        console.log(`Se enviaron ${enviados} correos. Programando reevaluación en 1 minuto...\n`);
+    } else if (fallidos > 0) {
+        proximaEspera = minutosVacio * 60 * 1000;
+        console.log(`Hubo ${fallidos} envíos fallidos. Esperando ${minutosVacio} minutos antes de reintentar...\n`);
+    } else {
         proximaEspera = minutosVacio * 60 * 1000;
         console.log(`No se encontraron citas. Esperando ${minutosVacio} minutos antes del siguiente ciclo...\n`);
-    } else {
-        console.log('Citas procesadas en este ciclo. Programando reevaluación en 1 minuto...\n');
     }
 
     setTimeout(iniciarCicloDinamico, proximaEspera);

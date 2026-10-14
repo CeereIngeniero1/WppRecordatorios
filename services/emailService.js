@@ -299,8 +299,22 @@ async function enviarEmailCita(cita, tipo) {
         return true;
     } catch (error) {
         console.error(`[Email Service] Error al enviar correo a ${correoDestinatario}:`, error.message);
+        if (esLimiteDeEnvio(error)) {
+            const errorLimite = new Error(error.message);
+            errorLimite.code = 'SMTP_LIMITE_ENVIO';
+            throw errorLimite;
+        }
         return false;
     }
+}
+
+/**
+ * Detecta cuando el servidor SMTP bloquea temporalmente la cuenta por exceso de envíos
+ * (ej. MagicSpam "550-5.5.1 You have sent too much mail").
+ */
+function esLimiteDeEnvio(error) {
+    const mensaje = String(error.message || '') + ' ' + String(error.response || '');
+    return /too much mail|too many messages|rate limit|sending limit|exceeded/i.test(mensaje);
 }
 
 module.exports = {

@@ -67,15 +67,19 @@ function configurarRitmo(total) {
  * - asignada → Correo = 1
  * - recordatorio → Correo = 2
  *
+ * Si el SMTP bloquea la cuenta por exceso de envíos, corta el lote de inmediato.
+ *
  * @param {Array} citas
  * @param {'asignada'|'recordatorio'} tipoEmail
+ * @returns {Promise<{ enviados: number, fallidos: number, limiteSmtp: boolean }>}
  */
 async function procesarYEnviarEmails(citas, tipoEmail) {
     const estadoDestino =
         tipoEmail === 'recordatorio' ? ESTADO_CORREO_RECORDATORIO : ESTADO_CORREO_PROGRAMADA;
 
+    const resultado = { enviados: 0, fallidos: 0, limiteSmtp: false };
     const total = citas.length;
-    if (total === 0) return;
+    if (total === 0) return resultado;
 
     const { minDelay, maxDelay, descansoCada } = configurarRitmo(total);
     let enviadosSeguidos = 0;
@@ -104,12 +108,22 @@ async function procesarYEnviarEmails(citas, tipoEmail) {
                 if (enviado) {
                     await actualizarEstadoCorreo(cita.Id_Compromiso, estadoDestino);
                     enviadosSeguidos++;
+                    resultado.enviados++;
                 } else {
+                    resultado.fallidos++;
                     console.log(
                         `[Email] No se marcó la cita ${cita.Id_Compromiso}: el envío falló o fue omitido. Se reintentará.`
                     );
                 }
             } catch (error) {
+                resultado.fallidos++;
+                if (error.code === 'SMTP_LIMITE_ENVIO') {
+                    resultado.limiteSmtp = true;
+                    console.error(
+                        '[Email] El servidor SMTP bloqueó la cuenta por exceso de envíos. Se detiene el lote.'
+                    );
+                    break;
+                }
                 console.error(
                     `Error al procesar correo para ${cita.Nom_Paciente}:`,
                     error.message
@@ -144,6 +158,8 @@ async function procesarYEnviarEmails(citas, tipoEmail) {
             await promise;
         }
     }
+
+    return resultado;
 }
 
 module.exports = {
