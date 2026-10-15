@@ -215,7 +215,7 @@ function generarContenidoCorreo(cita, tipo) {
                     Si requiere realizar alguna modificación, reprogramar o cancelar su cita, por favor comuníquese a nuestras líneas de atención:
                     <strong>📞 311 360 6768</strong>
                     <strong>📞 317 508 4624</strong>
-                    <strong>📞 Fijo: (604) 235 4180</strong>
+                    <strong>📞 Fijo: (604) 235 4280</strong>
                 </div>
 
                 <p style="font-size: 14px; line-height: 1.5; color: #555;">
@@ -243,7 +243,7 @@ Detalles de la cita:
 - Hora: ${horaFormat}
 - Dirección: Carrera 48 # 19A-40, Torre Médica Ciudad del Río, piso 12, consultorio 1201. Medellín. Somos única sede en Colombia.
 
-Para realizar algún cambio, reprogramar o cancelar su cita, comuníquese al 311 360 6768, al 317 508 4624 o al fijo (604) 235 4180.
+Para realizar algún cambio, reprogramar o cancelar su cita, comuníquese al 311 360 6768, al 317 508 4624 o al fijo (604) 235 4280.
 
 Atentamente,
 MEDIMUJER
