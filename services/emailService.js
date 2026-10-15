@@ -207,7 +207,7 @@ function generarContenidoCorreo(cita, tipo) {
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">📍 Dirección:</div>
-                        <div class="detail-value">Carrera 48 # 19A-40, Torre Médica Ciudad del Río, piso 12, consultorio 1201. Medellín. Somos única sede en Medellín.</div>
+                        <div class="detail-value">Carrera 48 # 19A-40, Torre Médica Ciudad del Río, piso 12, consultorio 1201. Medellín. Somos única sede en Colombia.</div>
                     </div>
                 </div>
 
@@ -241,7 +241,7 @@ Detalles de la cita:
 - Profesional: ${cita.Nom_profesional}
 - Fecha: ${dia} de ${mesNombre}
 - Hora: ${horaFormat}
-- Dirección: Carrera 48 # 19A-40, Torre Médica Ciudad del Río, piso 12, consultorio 1201. Medellín. Somos única sede en Medellín.
+- Dirección: Carrera 48 # 19A-40, Torre Médica Ciudad del Río, piso 12, consultorio 1201. Medellín. Somos única sede en Colombia.
 
 Para realizar algún cambio, reprogramar o cancelar su cita, comuníquese al 311 360 6768, al 317 508 4624 o al fijo (604) 235 4180.
 
